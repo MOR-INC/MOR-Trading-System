@@ -1,0 +1,46 @@
+//@version=5
+// MOR Trading System - PineScript Alert Template
+// Copy this to your TradingView strategy/indicator to send signals to Edge
+
+// === WEBHOOK URL ===
+// Set your alert webhook URL to: http://YOUR_SERVER_IP:8000/webhook/tradingview
+// Replace YOUR_SERVER_IP with your actual server address
+
+// === ALERT MESSAGE FORMAT ===
+// Use this JSON format in your alert message:
+
+// For BUY signals:
+// {"symbol": "{{ticker}}", "action": "BUY", "price": {{close}}, "quantity": 10, "tp": {{close}} * 1.05, "sl": {{close}} * 0.97, "broker": "robinhood"}
+
+// For SELL signals:
+// {"symbol": "{{ticker}}", "action": "SELL", "price": {{close}}, "quantity": 10, "tp": {{close}} * 0.95, "sl": {{close}} * 1.03, "broker": "robinhood"}
+
+// === EXAMPLE STRATEGY ===
+strategy("MOR Edge Integration", overlay=true)
+
+// Your strategy logic here
+fastMA = ta.sma(close, 10)
+slowMA = ta.sma(close, 30)
+
+longCondition = ta.crossover(fastMA, slowMA)
+shortCondition = ta.crossunder(fastMA, slowMA)
+
+if (longCondition)
+    strategy.entry("Long", strategy.long)
+    // The alert will fire with your configured webhook
+
+if (shortCondition)
+    strategy.close("Long")
+    // The alert will fire with your configured webhook
+
+// Plot MAs
+plot(fastMA, color=color.green, title="Fast MA")
+plot(slowMA, color=color.red, title="Slow MA")
+
+// === ALERT SETUP INSTRUCTIONS ===
+// 1. Add this strategy to your chart
+// 2. Click "Add Alert" (clock icon)
+// 3. Set Condition to this strategy
+// 4. Set Webhook URL to your Edge server
+// 5. Use the JSON format above in the Message field
+// 6. Enable "Webhook URL" option
